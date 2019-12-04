@@ -1,9 +1,9 @@
 require 'etcd'
-require 'puppet_x/etcd/config'
+require 'puppet_x/etcd/etcd_config'
 
 class Puppet::Provider::Etcd_Key::Etcd_Key
   def initialize
-    config = PuppetX::Etcd::EtcdConfig.new
+    config = Puppet_X::Etcd::EtcdConfig.new
     @client = Etcd.client(config)
   end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module PuppetX::Etcd
+module Puppet_X::Etcd
   # Provides a utility class for loading and validating etcd config
   class EtcdConfig
     VALID = {
