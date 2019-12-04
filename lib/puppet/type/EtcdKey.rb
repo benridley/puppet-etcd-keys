@@ -2,7 +2,7 @@ require 'puppet/resource_api'
 require 'etcd'
 
 Puppet::ResourceApi.register_type(
-  name: 'EtcdKey',
+  name: 'etcd_key',
   docs: 'This type allows the management of etcd keys as Puppet resources.',
   attributes: {
     ensure: {
