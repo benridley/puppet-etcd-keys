@@ -6,7 +6,7 @@ Puppet::ResourceApi.register_type(
   docs: 'This type allows the management of etcd keys as Puppet resources.',
   attributes: {
     ensure: {
-      type: 'Enum[key, absent, directory]',
+      type: 'Enum[present, absent]',
       desc: 'Whether the key should be present in the etcd structure. Use ensure => key to ensure a value, or ensure => directory for an empty directory key.',
       default: 'present',
     },
@@ -22,7 +22,6 @@ Puppet::ResourceApi.register_type(
     dir: {
       type: 'Boolean',
       desc: 'Whether this key is a directory or not.',
-      behaviour: :read_only,
     },
   }
 )

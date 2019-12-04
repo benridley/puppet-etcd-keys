@@ -23,6 +23,7 @@ class Puppet::Provider::EtcdKey::EtcdKey
     changes.each do |name, change| 
       should = change[:should]
       if should[:ensure] == 'dir'
+        context.error('Cannot have value when directory attribute is true.') if should[:value] 
         client.set(name, directory: true)
       elsif should[:ensure] == 'key'
         client.set(name, value: should[:value])
