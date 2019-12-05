@@ -21,8 +21,8 @@ module PuppetX
         File.join(Puppet[:confdir], 'etcd.conf')
       end
 
-      def initialize
-        process_config_file(default_config_file)
+      def initialize(config_path = nil)
+        process_config_file(config_path || default_config_file)
       end
     end
 

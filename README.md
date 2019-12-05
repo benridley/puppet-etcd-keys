@@ -1,87 +1,101 @@
-# etcd
+# etcd-keys
 
-Welcome to your new module. A short overview of the generated parts can be found in the PDK documentation at https://puppet.com/pdk/latest/pdk_generating_modules.html .
-
-The README template below provides a starting point with details about what information to include in your README.
+A Puppet module for interacting with etcd keys. 
 
 #### Table of Contents
 
 1. [Description](#description)
 2. [Setup - The basics of getting started with etcd](#setup)
-    * [What etcd affects](#what-etcd-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with etcd](#beginning-with-etcd)
 3. [Usage - Configuration options and additional functionality](#usage)
 4. [Limitations - OS compatibility, etc.](#limitations)
 5. [Development - Guide for contributing to the module](#development)
 
 ## Description
 
-Briefly tell users why they might want to use your module. Explain what your module does and what kind of problems users can solve with it.
+This module contains utilites for working with etcd with Puppet. Its main features are:
+* An etcd_key Puppet resource. This allows you to manage your etcd keys declaratively over the etcd API. Currently only a v2 provider is implemented. The connection is managed with a config file. 
+* An etcd_key hiera lookup. This allows you to retrieve arbitrary keys from your etcd instance. 
 
-This should be a fairly short description helps the user decide if your module is what they want.
 
 ## Setup
 
-### What etcd affects **OPTIONAL**
+This module requires the 'etcd' gem installed on your Puppet master (or agent if that's where you're going to run it.) This gem has minimal dependencies and is well tested.
 
-If it's obvious what your module touches, you can skip this section. For example, folks can probably figure out that your mysql_instance module affects their MySQL instances.
+Once you've installed the gem, you'll need to configure config file. By default, the module will look for 'etcd.conf' in your Puppet config directory. You can use ```puppet config print confdir``` on your master to locate this directory.
 
-If there's more that they should know about, though, this is the place to mention:
+The config file is in YAML format and supports the following options: 
+  *host - Required field. Where your etcd is located (ip address/hostname)
+  *port - Required field. 
+  *use_ssl - Optional - Whether to use ssl for etcd server authentication
+  *ca_file - Optional - Location of the CA used to authenticate the TLS connection. 
+  *ssl_cert - Optional - Certificate location for TLS client authentication. 
+  *ssl_key  - Optional - Private key location for TLS client authentication.
 
-* Files, packages, services, or operations that the module will alter, impact, or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
+Example config file:
+``` yaml
+# /etc/puppetlabs/puppet/etcd.conf
+---
+host: 127.0.01
+port: 2379
+use_ssl: true
+ca_file: /etc/pki/tls/certs/ca.pem
 
-### Setup Requirements **OPTIONAL**
+```
 
-If your module requires anything extra before setting up (pluginsync enabled, another module, etc.), mention it here.
+### Usage
 
-If your most recent release breaks compatibility or requires particular steps for upgrading, you might want to include an additional "Upgrading" section here.
+# Using the etcd_key Resource
+The module provides a resource called 'etcd_key' that allows you to declare etcd keys. 
 
-### Beginning with etcd
+``` ruby
+  etcd_key { '/my/key': 
+    ensure => present,
+    value  => 'I am a key!',
+  }
 
-The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
+  etcd_key { '/no/key': 
+    ensure => absent,
+  }
+```
 
-## Usage
+You can also declare directories:
 
-Include usage examples for common use cases in the **Usage** section. Show your users how to use your module to solve problems, and be sure to include code examples. Include three to five examples of the most important or common tasks a user can accomplish with your module. Show users how to accomplish more complex tasks that involve different types, classes, and functions working in tandem.
+``` ruby
+  etcd_key { '/container/for/keys': 
+    ensure => directory,
+  }
+```
+
+# Using the hiera lookup function
+The module also provides a hiera backend for searching etcd keys. 
+Add the function to your hiera.yaml file:
+
+``` yaml
+# hiera.yaml
+
+hierarchy:
+  - name: "etcd backend"
+    lookup_key: hiera_etcd
+    options:
+      # Optional path to a config file. Default is etcd.conf in your puppet dir.
+      config_path: '/etc/etcd_lookup/lookup.conf'
+```
+
+You can now use ```lookup('/path/to/your/key')``` to lookup etcd keys in your manifests. Another useful option is using the hiera ```alias``` function to define parameters for classes based on etcd. An example: 
+``` yaml
+# data/my_hiera_file.yaml
+
+my_module::my_paramater: "%{alias('/etcd/key')}"
+```
 
 ## Reference
 
-This section is deprecated. Instead, add reference information to your code as Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your module. For details on how to add code comments and generate documentation with Strings, see the Puppet Strings [documentation](https://puppet.com/docs/puppet/latest/puppet_strings.html) and [style guide](https://puppet.com/docs/puppet/latest/puppet_strings_style.html)
-
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the root of your module directory and list out each of your module's classes, defined types, facts, functions, Puppet tasks, task plans, and resource types and providers, along with the parameters for each.
-
-For each element (class, defined type, function, and so on), list:
-
-  * The data type, if applicable.
-  * A description of what the element does.
-  * Valid values, if the data type doesn't make it obvious.
-  * Default value, if any.
-
-For example:
-
-```
-### `pet::cat`
-
-#### Parameters
-
-##### `meow`
-
-Enables vocalization in your cat. Valid options: 'string'.
-
-Default: 'medium-loud'.
-```
+See REFERENCE.md for more details.
 
 ## Limitations
 
-In the Limitations section, list any incompatibilities, known issues, or other warnings.
+The module only works with the v2 API currently. As of current writing, etcd will suport v2 and v3 APIs out of the box at the same time. The v3 API uses gRPC instead of HTTP/REST, so will require a new provider to be implemented. I may do this in future. 
 
 ## Development
 
-In the Development section, tell other users the ground rules for contributing to your project and how they should submit their work.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should consider using changelog). You can also add any additional sections you feel are necessary or important to include here. Please use the `## ` header.
+All pull requests welcome. 

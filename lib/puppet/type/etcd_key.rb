@@ -1,28 +1,47 @@
-require 'puppet/resource_api'
 require 'etcd'
+require 'puppet_x/etcd/etcd_config'
 
-Puppet::ResourceApi.register_type(
-  name: 'etcd_key',
-  docs: 'This type allows the management of etcd keys as Puppet resources.',
-  attributes: {
-    ensure: {
-      type: 'Enum[present, absent]',
-      desc: 'Whether the key should be present in the etcd structure.',
-      default: 'present',
-    },
-    path: {
-      type: 'String',
-      desc: 'The path of the key you want to manage in the etcd structure.',
-      behaviour: :namevar,
-    },
-    directory: {
-      type: 'Boolean',
-      desc: 'Whether this key is a directory or not.',
-      default: false,
-    },
-    value: {
-      type: 'String',
-      desc: 'The value of the key. Mutually exclusive if with is_directory => true.',
-    },
-  },
-)
+Puppet::Type.newtype(:etcd_key) do
+  @doc = %q{Creates a key in a remote etcd database. Connection options for etcd are specified in the
+    etcd.conf file located in your puppet confdir (Use puppet config print --confdir on your master to find this.)
+
+    Example:
+    etcd_key { '/test/key':
+      ensure => present,
+      value  => 'Test value!',
+    }
+  }
+
+  def pre_run_check
+    # Check we can parse config and connect to etcd
+    config = PuppetX::Etcd::EtcdConfig.new
+    Puppet.debug("Loaded etcd config: #{config.config_hash}")
+    client = Etcd.client(config.config_hash)
+    begin
+      client.leader
+    rescue StandardError => e
+      raise Puppet::Error, "Failed pre-run etcd connection validation: #{e.message}."
+    end
+  end
+
+  newproperty(:ensure) do
+    desc "Whether the key should exist in etcd or not. You can use ensure => directory to ensure an empty diectory."
+    newvalue(:present) { provider.create }
+    newvalue(:directory) { provider.create }
+    newvalue(:absent) { provider.destroy }
+    defaultto :present
+  end
+
+  newparam(:path) do
+    desc "The path of the key in the etcd structure."
+
+    validate do |value|
+      raise ArgumentError "Invalid etcd path #{value}" unless value.match(%r{(\/\w+)+})
+    end
+    isnamevar
+  end
+
+  newproperty(:value) do
+    desc "The value of the key. Mutually exclusive with directory => true."
+  end
+end
