@@ -66,6 +66,26 @@ You can also declare directories:
   }
 ```
 
+Directories can be managed recursively by using ``` ensure => directory ``` and passing a Puppet hash as your intended value. This will result in a series of directories and values that reflects the layout of your hash. ** Be warned that this will remove keys that aren't in the hash, but are present in etcd. **
+
+Example:
+
+``` ruby
+$my_hash = { 
+  'level_one' = {
+    'level_two = {
+      'value' = 'my_value'
+    }
+  }
+}
+
+etcd_key { '/my/managed/directory':
+  ensure => directory,
+  value  => $my_hash,
+}
+
+```
+
 # Using the hiera lookup function
 The module also provides a hiera backend for searching etcd keys. 
 Add the function to your hiera.yaml file:
