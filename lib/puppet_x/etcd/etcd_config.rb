@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+# Provides a utility class for loading and validating etcd config
 module PuppetX
   module Etcd
-    # Provides a utility class for loading and validating etcd config
     class EtcdConfig
       VALID = ['host', 'port', 'use_ssl', 'ca_file', 'user_name', 'password', 'restrict_paths'].freeze
       REQUIRED = ['host', 'port'].freeze

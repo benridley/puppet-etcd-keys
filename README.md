@@ -94,7 +94,7 @@ See REFERENCE.md for more details.
 
 ## Limitations
 
-The module only works with the v2 API currently. As of current writing, etcd will suport v2 and v3 APIs out of the box at the same time. The v3 API uses gRPC instead of HTTP/REST, so will require a new provider to be implemented. I may do this in future. 
+The module only works with the v2 API currently. As of current writing, etcd will support v2 and v3 APIs out of the box at the same time (although they are isolated from one another). The v3 API uses gRPC instead of HTTP/REST, so will require a new provider to be implemented. I may do this in future. 
 
 ## Development
 
