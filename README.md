@@ -66,7 +66,7 @@ You can also declare directories:
   }
 ```
 
-Directories can be managed recursively by using ``` ensure => directory ``` and passing a Puppet hash as your intended value. This will result in a series of directories and values that reflects the layout of your hash. ** Be warned that this will remove keys that aren't in the hash, but are present in etcd. **
+Directories can be managed recursively by using ``` ensure => directory ``` and passing a Puppet hash as your intended value. This will result in a series of directories and values that reflects the layout of your hash. **Be warned that this will remove keys that aren't in the hash, but are present in etcd.**
 
 Example:
 
