@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 require 'etcd'
-require 'puppet_x/etcd/etcd_config'
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'puppet_x', 'etcd', 'etcd_config.rb'))
 
 Puppet::Type.newtype(:etcd_key) do
   @doc = %q{Creates a key in a remote etcd database. Connection options for etcd are specified in the
